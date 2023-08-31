@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BTC Kline Chart</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mplfinance@5.1.0/dist/mplfinance.min.js"></script>
+    <style>body {margin: 0;} canvas.mpl-canvas {width: 100%; height: auto;}</style>
+</head>
+<body>
+    <h1>BTC Kline Chart</h1>
+    <div id="chart_div"></div>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port + '/kline');
+
+        var chartData = [];
+
+        socket.on('update_kline', function(data) {
+            chartData = data.map(function(kline) {
+                return {
+                    t: new Date(kline[0]),
+                    o: kline[1],
+                    h: kline[2],
+                    l: kline[3],
+                    c: kline[4]
+                };
+            });
+
+            drawChart();
+        });
+
+        function drawChart() {
+            const config = {
+                title: 'BTC/USDT Kline Chart',
+                ylabel: 'Price',
+                figratio: 0.7,
+                volume: true,
+                set_style: 'default',
+            };
+
+            mplf.plot(chartData, config, { id: 'chart_div', xts_dateformat: '%Y-%m-%d %H:%M' });
+        }
+    </script>
+</body>
+</html>

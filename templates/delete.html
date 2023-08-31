@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+      <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="depthChart" style="width: 1600px; height: 600px;"></div>
+    <script>
+        // 初始化 ECharts 实例
+        var depthChart = echarts.init(document.getElementById('depthChart'));
+
+        // 建立 WebSocket 连接
+        const socket = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@depth');
+
+        // 用于存储买单和卖单的数据
+        const buyOrders = [];
+        const sellOrders = [];
+
+        // 监听 WebSocket 的消息事件
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            // 清空买单和卖单的数据
+            buyOrders.length = 0;
+            sellOrders.length = 0;
+
+            // 更新买单和卖单的数据
+            data.b.forEach(order => {
+                const price = parseFloat(order[0]);
+                const volume = parseFloat(order[1]);
+                if (price >= 29000 && price <= 30000) {
+                    buyOrders.push({ price, volume });
+                }
+            });
+
+            data.a.forEach(order => {
+                const price = parseFloat(order[0]);
+                const volume = parseFloat(order[1]);
+                if (price >= 29000 && price <= 30000) {
+                    sellOrders.push({ price, volume });
+                }
+            });
+
+            // 更新图表
+            updateMergedDepthChart();
+        };
+
+        // 更新合并的订单深度图
+        function updateMergedDepthChart() {
+            // 对买单和卖单的数据按照价格升序排序
+            buyOrders.sort((a, b) => b.price - a.price);
+            sellOrders.sort((a, b) => a.price - b.price);
+
+            // 计算买单和卖单的交易总量
+            let buyTotalVolume = 0;
+            let sellTotalVolume = 0;
+            const mergedDepthData = [];
+
+            // 计算买单的交易总量
+            for (let i = 0; i < buyOrders.length; i++) {
+                buyTotalVolume += buyOrders[i].volume;
+                mergedDepthData.push([buyOrders[i].price, buyTotalVolume, sellTotalVolume]);
+            }
+
+            // 计算卖单的交易总量
+            for (let i = 0; i < sellOrders.length; i++) {
+                sellTotalVolume += sellOrders[i].volume;
+                mergedDepthData.push([sellOrders[i].price, buyTotalVolume, sellTotalVolume]);
+            }
+
+            // 创建合并的订单深度图配置
+            const option = {
+                xAxis: {
+                    type: 'value',
+                },
+                yAxis: {
+                    type: 'value',
+                },
+                series: [
+                    {
+                        name: 'Buy Depth',
+                        type: 'line',
+                        step: 'end',
+                        data: mergedDepthData.map(item => [item[0], item[1]]),
+                        color: 'red',
+                    },
+                    {
+                        name: 'Sell Depth',
+                        type: 'line',
+                        step: 'end',
+                        data: mergedDepthData.map(item => [item[0], item[2]]),
+                    }
+                ],
+            };
+
+            // 设置订单深度图配置和数据
+            depthChart.setOption(option);
+        }
+    </script>
+</body>
+</html>

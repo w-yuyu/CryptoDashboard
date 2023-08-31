@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>交互式K线图</title>
+{#    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.0-rc.3/dist/echarts.min.js"></script>#}
+{#    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>#}
+        <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+{#    <link rel="stylesheet" href="../css/styles.css">#}
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <div id="kline-chart" style="height: 500px;"></div>
+<script>
+        var chartContainer = document.getElementById('kline-chart');
+        var myChart = echarts.init(chartContainer);
+
+        var dates = [];
+        var kData = [];
+
+        // 将数据库中的数据转换为 ECharts 所需的格式
+        {% for data in kline_data %}
+            dates.push('{{ data.timestamp }}');
+            kData.push([{{ data.open}}, {{ data.close }}, {{ data.low }}, {{ data.high }}]);
+        {% endfor %}
+
+        var options = {
+            title: {
+                text: 'K 线图示例'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                }
+            },
+            xAxis: {
+                type: 'category',
+                data: dates
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                type: 'candlestick',
+                data: kData
+            }]
+        };
+
+        myChart.setOption(options);
+    </script>
+
+</body>
+
+</html>

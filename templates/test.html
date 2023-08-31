@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time BTC Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.0.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <h1>Real-time BTC Data for the Past Hour</h1>
+    <div id="chart"></div>
+
+    <script>
+        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+            width: 800,
+            height: 400,
+            timeScale: {
+                timeVisible: 'm' // 每个时间点显示日期
+            },
+        });
+
+        const candleSeries = chart.addCandlestickSeries({
+            upColor: 'red',  // Set color for bullish candles
+            downColor: 'green',  // Set color for bearish candles
+            borderDownColor: 'green',  // Set border color for bearish candles
+            borderUpColor: 'red',  // Set border color for bullish candles
+            wickDownColor: 'green',  // Set wick color for bearish candles
+            wickUpColor: 'red',  // Set wick color for bullish candles
+        });
+
+        function fetchAndDisplayData() {
+            fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=60')
+                .then(response => response.json())
+                .then(data => {
+                    const historicalData = data.map(kline => ({
+                        time: kline[0]/1000,
+                        open: parseFloat(kline[1]),
+                        high: parseFloat(kline[2]),
+                        low: parseFloat(kline[3]),
+                        close: parseFloat(kline[4]),
+                    }));
+
+                    candleSeries.setData(historicalData);
+
+                    // 创建烛台图
+              const option = {
+                xAxis: {
+                  type: 'category',
+                  data: historicalData.map(entry => new Date(entry.time * 1000).toLocaleTimeString()),
+                },
+                yAxis: {
+                  type: 'value',
+                    max:29600,
+                 min:29400
+                },
+                series: [{
+                  type: 'candlestick',
+                  data: historicalData.map(entry => [entry.open, entry.close, entry.low, entry.high]),
+                  itemStyle: {
+                    color: '#FF4500', // 自定义烛台颜色
+                    color0: '#006400', // 自定义跌烛颜色
+                  },
+                }],
+              };
+
+              // 设置烛台图配置和数据
+              candlestickChart.setOption(option);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+
+        setInterval(fetchAndDisplayData, 60000); // Update data every minute
+        fetchAndDisplayData(); // Initial data fetch
+    </script>
+
+</body>
+</html>
+

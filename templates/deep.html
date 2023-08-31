@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Depth Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+{#    <script src="https://cdn.jsdelivr.net/npm/echart@0.1.3/index.min.js"></script>#}
+</head>
+<body>
+    <h1>Order Depth Chart for BTC/USDT</h1>
+    <div id="depthChart" style="width: 800px; height: 400px;"></div>
+    <script>
+        const depthChart = echarts.init(document.getElementById('depthChart'));
+
+        // Function to update the depth chart with new data
+        function updateDepthChart(bids, asks) {
+            // Process and update the depth chart with new data
+            // bids and asks are arrays containing [price, quantity] pairs
+
+            // Prepare data for ECharts
+            const bidPrices = bids.map(item => item[0]);
+            const bidQuantities = bids.map(item => item[1]);
+            const askPrices = asks.map(item => item[0]);
+            const askQuantities = asks.map(item => item[1]);
+
+            // Set options for the depth chart
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                    },
+                },
+                legend: {
+                    data: ['Bids', 'Asks'],
+                },
+                xAxis: {
+                    type: 'category',
+                    data: bidPrices.concat(askPrices.reverse()),
+                },
+                yAxis: {
+                    type: 'value',
+                },
+                series: [
+                    {
+                        name: 'Bids',
+                        type: 'line',
+                        areaStyle: {},
+                        data: bidQuantities,
+                    },
+                    {
+                        name: 'Asks',
+                        type: 'line',
+                        areaStyle: {},
+                        data: askQuantities.reverse(),
+                    },
+                ],
+            };
+
+            // Update the chart with new options
+            depthChart.setOption(option);
+        }
+
+
+        const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@depth');
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.e === 'depthUpdate') {
+                    {#const bidsData = data.b.map(item => [parseFloat(item[0]), parseFloat(item[1])]);#}
+                    {#const asksData = data.a.map(item => [parseFloat(item[0]), parseFloat(item[1])]);#}
+                    const bidsData = data.b;
+                    const asksData = data.a;
+                    updateDepthChart(bidsData, asksData);
+                }
+            };
+        document.write(bidsData)
+        console.log(bidsData)
+        // Call updateDepthChart with the mock data
+        updateDepthChart(bidsData, asksData);
+    </script>
+
+
+</body>
+</html>

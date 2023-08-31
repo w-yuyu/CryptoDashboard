@@ -1,0 +1,38 @@
+.klinediv {
+  width:50%; /* 宽度占父元素的百分之百 */
+  height: 50vh; /* 设置高度 */
+  float: left;
+}
+
+.livediv {
+  width: 50%; /* 子div的宽度占据父元素的四分之一 */
+  height: 50vh; /* 子div的高度占据整个父元素高度 */
+  float: left;
+}
+
+.orderdiv {
+  width:50%; /* 宽度占父元素的百分之百 */
+  height: 50vh; /* 设置高度 */
+  float: left;
+}
+
+.techdiv {
+  width: 50%; /* 子div的宽度占据父元素的四分之一 */
+  height: 50vh; /* 子div的高度占据整个父元素高度 */
+  float: left;
+}
+
+.ardiv {
+  width: 50%; /* 子div的宽度占据父元素的四分之一 */
+  height: 50vh; /* 子div的高度占据整个父元素高度 */
+  float: left;
+}
+
+.ethdiv {
+  width: 50%; /* 子div的宽度占据父元素的四分之一 */
+  height: 50vh; /* 子div的高度占据整个父元素高度 */
+  float: left;
+}
+
+
+
